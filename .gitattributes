@@ -1,0 +1,10 @@
+# Enforce LF line endings so Windows checkouts do not break Linux scripts/containers
+* text=auto eol=lf
+
+*.sh text eol=lf
+Dockerfile text eol=lf
+Caddyfile text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.env.example text eol=lf
+

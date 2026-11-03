@@ -1,0 +1,27 @@
+# Template for non-web services (bots, workers, cron jobs).
+# Not attached to 'proxy-net' so it remains hidden from public HTTP ingress.
+
+name: template-service
+
+services:
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: template-worker
+    restart: unless-stopped
+    # .env is required by deploy.sh; container will not start without it
+    env_file:
+      - path: .env
+        required: true
+    networks:
+      - service-internal
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  service-internal:
+    driver: bridge

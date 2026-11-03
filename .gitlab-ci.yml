@@ -1,0 +1,56 @@
+# Runs on a self-hosted GitLab Runner (shell executor) on your VM.
+# Path-based `changes:` rules ensure only modified services are redeployed.
+
+stages:
+  - deploy-infra
+  - deploy-projects
+
+variables:
+  DEPLOY_PATH: "/opt/da-cloud"
+
+.deploy_template:
+  before_script:
+    - chmod +x infra/scripts/deploy.sh
+  script:
+    - ./infra/scripts/deploy.sh "${SERVICE_PATH}"
+
+deploy:proxy:
+  extends: .deploy_template
+  stage: deploy-infra
+  variables:
+    SERVICE_PATH: "infra/proxy"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      changes:
+        - infra/proxy/**/*
+        - infra/scripts/**/*
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: manual
+      allow_failure: true
+
+deploy:web1:
+  extends: .deploy_template
+  stage: deploy-projects
+  variables:
+    SERVICE_PATH: "apps/web1"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      changes:
+        - apps/web1/**/*
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: manual
+      allow_failure: true
+
+# Copy and uncomment when adding a new app or background service:
+# deploy:my-service:
+#   extends: .deploy_template
+#   stage: deploy-projects
+#   variables:
+#     SERVICE_PATH: "services/my-service"
+#   rules:
+#     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+#       changes:
+#         - services/my-service/**/*
+#       when: on_success

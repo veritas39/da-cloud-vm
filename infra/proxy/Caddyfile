@@ -1,0 +1,29 @@
+{
+	# Required for Let's Encrypt SSL certificates (loaded from .env, no fallback)
+	email {$ACME_EMAIL}
+}
+
+(web_defaults) {
+	encode zstd gzip
+	header {
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "SAMEORIGIN"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+}
+
+{$WEB1_DOMAIN} {
+	import web_defaults
+	reverse_proxy web1:80
+}
+
+www.{$WEB1_DOMAIN} {
+	redir https://{$WEB1_DOMAIN}{uri} permanent
+}
+
+# Example route for a second web app:
+# {$WEB2_DOMAIN} {
+# 	import web_defaults
+# 	reverse_proxy web2:3000
+# }

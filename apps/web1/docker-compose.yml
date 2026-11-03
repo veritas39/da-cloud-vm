@@ -1,0 +1,29 @@
+name: web1-app
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: web1
+    restart: unless-stopped
+    # .env is strictly required; Docker Compose will fail if /opt/da-cloud/apps/web1/.env is missing
+    env_file:
+      - path: .env
+        required: true
+    networks:
+      - proxy-net
+      - web1-internal
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  proxy-net:
+    name: proxy-net
+    external: true
+  web1-internal:
+    driver: bridge
+    internal: true
